@@ -1,0 +1,285 @@
+{
+  "name": "AI Academy · Registro de interesados → Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "aia-registro",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "d857229f-8c61-46c3-acad-e5bdad1a1fc9",
+      "name": "Formulario landing",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "eeaef59f-b36d-40f9-be52-8a71a9f78d78"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Valida y normaliza los datos del formulario. Si algo es inválido, no se guarda ni se avisa.\nconst PROGRAMAS = ['Ignition (4 h)', 'Booster (8 h)', 'Liftoff (12 h)', 'Odyssey (personalizado)', 'Nebula (pregrabado)', 'Aún no sé, quiero asesoría'];\nconst b = $input.first().json.body || {};\nconst s = v => (typeof v === 'string' ? v : '').trim();\nconst datos = {\n  nombre: s(b.nombre).replace(/\\s+/g, ' '),\n  correo: s(b.correo).toLowerCase(),\n  programa: s(b.programa),\n  telefono: s(b.telefono),\n  origen: s(b.origen) || 'landing'\n};\nconst errores = {};\nif (datos.nombre.length < 3 || datos.nombre.length > 80 || /[0-9<>]/.test(datos.nombre)) errores.nombre = 'Escribe tu nombre completo (mínimo 3 letras, sin números).';\nif (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$/.test(datos.correo) || datos.correo.length > 120) errores.correo = 'Escribe un correo válido.';\nif (!PROGRAMAS.includes(datos.programa)) errores.programa = 'Elige un programa de la lista.';\nif (datos.telefono) {\n  const digitos = datos.telefono.replace(/[\\s()+-]/g, '');\n  if (!/^\\d{7,15}$/.test(digitos)) errores.telefono = 'Si escribes el teléfono, usa solo números (7 a 15 dígitos).';\n}\nif (s(b.empresa_web)) errores.bot = 'Envío rechazado.';\nreturn [{ json: { valido: Object.keys(errores).length === 0, errores, datos } }];"
+      },
+      "id": "1e7ddd09-c48c-4400-909a-34e154862368",
+      "name": "Validar datos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "53ad3ba0-aecf-46bf-ac0f-0bb7624c8cb0",
+              "leftValue": "={{ $json.valido }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "58ed6ade-3e9d-41cd-9de3-494624a7f40f",
+      "name": "¿Datos válidos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "tableId": "registros",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "nombre",
+              "fieldValue": "={{ $json.datos.nombre }}"
+            },
+            {
+              "fieldId": "correo",
+              "fieldValue": "={{ $json.datos.correo }}"
+            },
+            {
+              "fieldId": "programa",
+              "fieldValue": "={{ $json.datos.programa }}"
+            },
+            {
+              "fieldId": "telefono",
+              "fieldValue": "={{ $json.datos.telefono || null }}"
+            },
+            {
+              "fieldId": "origen",
+              "fieldValue": "={{ $json.datos.origen }}"
+            }
+          ]
+        }
+      },
+      "id": "7b9f1d94-11ab-40af-8e62-25459304369b",
+      "name": "Guardar registro (Supabase)",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        720,
+        200
+      ],
+      "credentials": {
+        "supabaseApi": {
+          "id": "CONFIGURAR",
+          "name": "Supabase AI Academy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Arma el aviso de Telegram con los datos del registro que se acaba de guardar\nconst r = $input.first().json;\nconst esc = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');\nconst fecha = new Date(r.creado_en).toLocaleString('es-CO', { timeZone: 'America/Bogota', dateStyle: 'medium', timeStyle: 'short' });\nconst lineas = [\n  '🚀 <b>Nueva solicitud · AI Academy</b>',\n  '',\n  `<b>Nombre:</b> ${esc(r.nombre)}`,\n  `<b>Correo:</b> ${esc(r.correo)}`,\n  `<b>Programa:</b> ${esc(r.programa)}`\n];\nif (r.telefono) lineas.push(`<b>Teléfono:</b> ${esc(r.telefono)}`);\nlineas.push('', `Registro #${r.id} · Estado: ${esc(r.estado)} · ${esc(fecha)}`);\nreturn [{ json: { id: r.id, mensaje: lineas.join('\\n') } }];"
+      },
+      "id": "fdf65dc7-102d-4a67-9fca-9110798ab177",
+      "name": "Preparar aviso",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "7337007374",
+        "text": "={{ $json.mensaje }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "de7f6c79-f746-449b-b709-ec6be0b80303",
+      "name": "Avisar por Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        200
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "telegramApi": {
+          "id": "CONFIGURAR",
+          "name": "Bot Telegram AI Academy"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: true, id: $('Preparar aviso').first().json.id }) }}",
+        "options": {
+          "responseCode": 201
+        }
+      },
+      "id": "d2ecaaa2-448d-4e37-a921-c19f6da30fde",
+      "name": "Responder: guardado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1440,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ ok: false, errores: $json.errores }) }}",
+        "options": {
+          "responseCode": 422
+        }
+      },
+      "id": "d6c59618-458d-4efe-95d0-180f24abdd0d",
+      "name": "Responder: datos inválidos",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        420
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Registro de interesados · AI Academy\n1. La landing envía nombre, correo, programa y teléfono (opcional).\n2. **Validar datos** repite la validación del navegador. Si algo falla responde 422 y **no guarda ni avisa**.\n3. Si es válido: guarda en Supabase con estado *Nuevo* → arma el aviso → lo envía a Telegram → responde 201 a la landing.\n\nCredenciales (fuera de este archivo): Supabase (URL + service_role) y el token del bot de Telegram. El chat de destino ya está configurado (chat privado de prueba).",
+        "height": 300,
+        "width": 520
+      },
+      "id": "8041b4eb-1c32-4d64-ae25-756781c40850",
+      "name": "Nota",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -80
+      ]
+    }
+  ],
+  "connections": {
+    "Formulario landing": {
+      "main": [
+        [
+          {
+            "node": "Validar datos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar datos": {
+      "main": [
+        [
+          {
+            "node": "¿Datos válidos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Datos válidos?": {
+      "main": [
+        [
+          {
+            "node": "Guardar registro (Supabase)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder: datos inválidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar registro (Supabase)": {
+      "main": [
+        [
+          {
+            "node": "Preparar aviso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar aviso": {
+      "main": [
+        [
+          {
+            "node": "Avisar por Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar por Telegram": {
+      "main": [
+        [
+          {
+            "node": "Responder: guardado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}

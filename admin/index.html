@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panel de seguimiento · Campuslands AI Academy</title>
+  <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <!-- Acceso -->
+  <main class="login" data-view="login">
+    <div class="login__box">
+      <img src="../assets/img/logo-principal.webp" width="150" height="111" alt="Campuslands AI Academy">
+      <p class="pill">Panel de seguimiento</p>
+      <h1>Control de misión</h1>
+      <form data-login>
+        <div class="field"><label for="l-email">Correo de administrador</label><input id="l-email" type="email" autocomplete="username" required></div>
+        <div class="field"><label for="l-pass">Contraseña</label><input id="l-pass" type="password" autocomplete="current-password" required></div>
+        <button class="btn btn--primary btn--block" type="submit">Entrar</button>
+        <p class="msg" data-login-msg role="alert"></p>
+      </form>
+    </div>
+  </main>
+
+  <!-- Panel -->
+  <div class="app" data-view="app" hidden>
+    <header class="top">
+      <img src="../assets/img/logo-horizontal-blanca.webp" width="160" height="36" alt="Campuslands AI Academy">
+      <div class="top__me"><span data-me></span><button class="btn btn--ghost btn--sm" data-logout>Salir</button></div>
+    </header>
+
+    <section class="bar">
+      <div class="counts" data-counts role="group" aria-label="Filtrar por estado"></div>
+      <div class="bar__tools">
+        <label class="sr-only" for="q">Buscar</label>
+        <input id="q" type="search" placeholder="Buscar por nombre, correo o programa" data-search>
+        <button class="btn btn--ghost btn--sm" data-refresh>Actualizar</button>
+      </div>
+    </section>
+
+    <section class="list" aria-live="polite">
+      <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Nombre</th><th>Correo</th><th>Programa</th><th>Estado</th><th>Última gestión</th></tr></thead>
+        <tbody data-rows></tbody>
+      </table>
+      <p class="empty" data-empty hidden>No hay registros con ese filtro.</p>
+    </section>
+  </div>
+
+  <!-- Detalle del registro -->
+  <div class="drawer" data-drawer hidden>
+    <div class="drawer__bg" data-close></div>
+    <aside class="drawer__panel" role="dialog" aria-modal="true" aria-labelledby="d-title">
+      <button class="drawer__x" data-close aria-label="Cerrar">×</button>
+      <p class="pill" data-d-id></p>
+      <h2 id="d-title" data-d-name></h2>
+      <dl class="facts">
+        <div><dt>Correo</dt><dd><a data-d-mail></a></dd></div>
+        <div><dt>Teléfono</dt><dd data-d-tel></dd></div>
+        <div><dt>Programa</dt><dd data-d-prog></dd></div>
+        <div><dt>Recibido</dt><dd data-d-date></dd></div>
+        <div><dt>Origen</dt><dd data-d-origin></dd></div>
+      </dl>
+
+      <form class="manage" data-manage>
+        <div class="field">
+          <label for="d-estado">Estado</label>
+          <select id="d-estado" data-d-estado>
+            <option>Nuevo</option><option>Contactado</option><option>En seguimiento</option><option>Cerrado</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="d-nota">Nota de seguimiento</label>
+          <textarea id="d-nota" rows="3" maxlength="2000" placeholder="Ej.: Llamé el lunes, quiere Booster para 6 personas. Enviar propuesta." data-d-nota></textarea>
+        </div>
+        <button class="btn btn--primary btn--block" type="submit">Guardar cambios</button>
+        <p class="msg" data-d-msg role="status"></p>
+      </form>
+
+      <h3>Historial</h3>
+      <ol class="history" data-d-history></ol>
+    </aside>
+  </div>
+
+  <script src="../assets/js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
