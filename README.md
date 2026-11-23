@@ -2,6 +2,8 @@
 
 Landing de una página que aplica el **Manual de marca v1.0** de AI Academy y convierte el recorrido en una misión espacial, más el flujo de **registro → aviso por Telegram (n8n) → seguimiento en un panel de administración**.
 
+**Sitio publicado:** <https://ia-academy-landing.vercel.app/> · Lighthouse en celular (PageSpeed Insights, 23 nov 2026): Rendimiento 98 · Accesibilidad 100 · Recomendaciones 100 · SEO 100.
+
 - **Reto 3:** `index.html` + `assets/` (la landing).
 - **Reto 4:** el formulario de la landing, `n8n/` (flujo exportado), `supabase/schema.sql` (base de datos, permisos e historial) y `admin/` (panel).
 
