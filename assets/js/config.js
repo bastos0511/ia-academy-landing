@@ -5,7 +5,7 @@
 window.AIA_CONFIG = {
   // URL de producción del nodo Webhook de n8n (termina en /webhook/aia-registro)
   N8N_WEBHOOK_URL: "https://TU-INSTANCIA.app.n8n.cloud/webhook/aia-registro",
-  // Proyecto de Supabase (Project Settings → API)
-  SUPABASE_URL: "https://TU-PROYECTO.supabase.co",
-  SUPABASE_ANON_KEY: "TU_CLAVE_ANON_PUBLICA"
+  // Proyecto de Supabase (Project Settings → API Keys → Publishable key)
+  SUPABASE_URL: "https://vmqskrwnntlreodrzibq.supabase.co",
+  SUPABASE_ANON_KEY: "sb_publishable_KurIW9PYb6FlC0pdTCCPug_kt00BhQl"   // publishable key (antes "anon")
 };
